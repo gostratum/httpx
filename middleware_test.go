@@ -156,3 +156,27 @@ func TestLoggingMiddleware(t *testing.T) {
 		assert.Equal(t, 200, w.Code)
 	})
 }
+
+func TestRecoveryUsesRequestID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	logger := zap.NewNop()
+
+	engine := gin.New()
+	// Register RequestID before Recovery so the context/header is set
+	engine.Use(RequestIDMiddleware())
+	engine.Use(RecoveryMiddleware(logger))
+
+	engine.GET("/panic", func(c *gin.Context) {
+		panic("boom")
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/panic", nil)
+
+	engine.ServeHTTP(w, req)
+
+	assert.Equal(t, 500, w.Code)
+	// Response should include X-Request-ID set by RequestIDMiddleware
+	assert.NotEmpty(t, w.Header().Get("X-Request-ID"))
+}

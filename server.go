@@ -26,9 +26,11 @@ func NewEngine(log *zap.Logger, v *viper.Viper, skip func(string, string) bool, 
 	// Create new Gin engine
 	e := gin.New()
 
-	// Add core middleware in order
-	e.Use(RecoveryMiddleware(log))
+	// Add core middleware in order. RequestIDMiddleware must run before
+	// RecoveryMiddleware because the recovery handler reads the X-Request-ID
+	// header to include the request id in panic logs.
 	e.Use(RequestIDMiddleware())
+	e.Use(RecoveryMiddleware(log))
 	e.Use(LoggingMiddleware(log, skip))
 
 	// Add any extra middleware provided via options

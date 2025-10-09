@@ -61,7 +61,18 @@ func LoggingMiddleware(log *zap.Logger, skip func(method, path string) bool) gin
 // RecoveryMiddleware handles panics and converts them to 500 errors
 func RecoveryMiddleware(log *zap.Logger) gin.HandlerFunc {
 	return gin.CustomRecovery(func(c *gin.Context, err interface{}) {
-		requestID := c.Writer.Header().Get("X-Request-ID")
+		// Prefer request ID from request context (set by RequestIDMiddleware),
+		// fall back to the response header if not present.
+		var requestID string
+		if v := c.Request.Context().Value(requestIDKey); v != nil {
+			if s, ok := v.(string); ok {
+				requestID = s
+			}
+		}
+		if requestID == "" {
+			requestID = c.Writer.Header().Get("X-Request-ID")
+		}
+
 		log.Error("http panic recovered",
 			zap.String("rid", requestID),
 			zap.String("method", c.Request.Method),
