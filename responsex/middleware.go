@@ -28,6 +28,8 @@ func MetaMiddleware(version string) gin.HandlerFunc {
 			rid = uuid.NewString()
 		}
 		c.Writer.Header().Set("X-Request-Id", rid)
+		// Store the request id on the context so handlers can access it
+		c.Set("X-Request-Id", rid)
 
 		// Optional traceparent: propagate if present
 		if tp := c.Request.Header.Get("traceparent"); tp != "" {
