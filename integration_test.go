@@ -9,11 +9,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gostratum/core"
+	"github.com/gostratum/core/logx"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 )
 
 // MockRegistry implements core.Registry for testing
@@ -45,13 +45,13 @@ func TestModule(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("module provides expected dependencies", func(t *testing.T) {
-		logger := zap.NewNop()
+		logger := logx.NewNoopLogger()
 		v := viper.New()
 		v.Set("http.addr", ":0") // Use random port for testing
 		reg := &MockRegistry{}
 
 		app := fx.New(
-			fx.Provide(func() *zap.Logger { return logger }),
+			fx.Provide(func() logx.Logger { return logger }),
 			fx.Provide(func() *viper.Viper { return v }),
 			fx.Provide(func() core.Registry { return reg }), // Mock core.Registry
 			Module(),

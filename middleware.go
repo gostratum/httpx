@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
+	"github.com/gostratum/core/logx"
 )
 
 // ctxKey is used as a key for context values
@@ -33,7 +33,7 @@ func RequestIDMiddleware() gin.HandlerFunc {
 }
 
 // LoggingMiddleware logs HTTP requests using Zap logger with configurable skipping
-func LoggingMiddleware(log *zap.Logger, skip func(method, path string) bool) gin.HandlerFunc {
+func LoggingMiddleware(log logx.Logger, skip func(method, path string) bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Skip logging if configured
 		if skip != nil && skip(c.Request.Method, c.FullPath()) {
@@ -49,17 +49,17 @@ func LoggingMiddleware(log *zap.Logger, skip func(method, path string) bool) gin
 
 		// Log the request
 		log.Info("http",
-			zap.String("rid", requestID),
-			zap.String("method", c.Request.Method),
-			zap.String("path", c.FullPath()),
-			zap.Int("status", c.Writer.Status()),
-			zap.Duration("dur", time.Since(start)),
+			logx.String("rid", requestID),
+			logx.String("method", c.Request.Method),
+			logx.String("path", c.FullPath()),
+			logx.Int("status", c.Writer.Status()),
+			logx.Duration("dur", time.Since(start)),
 		)
 	}
 }
 
 // RecoveryMiddleware handles panics and converts them to 500 errors
-func RecoveryMiddleware(log *zap.Logger) gin.HandlerFunc {
+func RecoveryMiddleware(log logx.Logger) gin.HandlerFunc {
 	return gin.CustomRecovery(func(c *gin.Context, err interface{}) {
 		// Prefer request ID from request context (set by RequestIDMiddleware),
 		// fall back to the response header if not present.
@@ -74,10 +74,10 @@ func RecoveryMiddleware(log *zap.Logger) gin.HandlerFunc {
 		}
 
 		log.Error("http panic recovered",
-			zap.String("rid", requestID),
-			zap.String("method", c.Request.Method),
-			zap.String("path", c.FullPath()),
-			zap.Any("error", err),
+			logx.String("rid", requestID),
+			logx.String("method", c.Request.Method),
+			logx.String("path", c.FullPath()),
+			logx.Any("error", err),
 		)
 		c.AbortWithStatus(500)
 	})

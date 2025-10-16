@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
+	"github.com/gostratum/core/logx"
 )
 
 const (
@@ -53,7 +53,7 @@ func MetaMiddleware(version string) gin.HandlerFunc {
 	}
 }
 
-// WithLogger is an optional helper to attach a zap logger into context for middleware
-func WithLogger(c *gin.Context, logger *zap.Logger) {
+// WithLogger is an optional helper to attach a logx.Logger into context for middleware
+func WithLogger(c *gin.Context, logger logx.Logger) {
 	c.Set("responsex.logger", logger)
 }

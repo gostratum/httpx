@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gostratum/core/logx"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 func TestNewEngine(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("creates engine with default settings", func(t *testing.T) {
-		logger := zap.NewNop()
+		logger := logx.NewNoopLogger()
 		v := viper.New()
 		skip := func(method, path string) bool { return false }
 
@@ -25,7 +25,7 @@ func TestNewEngine(t *testing.T) {
 	})
 
 	t.Run("applies base path from config", func(t *testing.T) {
-		logger := zap.NewNop()
+		logger := logx.NewNoopLogger()
 		v := viper.New()
 		v.Set("http.base_path", "/api")
 		skip := func(method, path string) bool { return false }
@@ -36,7 +36,7 @@ func TestNewEngine(t *testing.T) {
 	})
 
 	t.Run("applies options", func(t *testing.T) {
-		logger := zap.NewNop()
+		logger := logx.NewNoopLogger()
 		v := viper.New()
 		skip := func(method, path string) bool { return false }
 
@@ -112,7 +112,7 @@ func TestLoggingMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("skips logging when skip function returns true", func(t *testing.T) {
-		logger := zap.NewNop()
+		logger := logx.NewNoopLogger()
 		skip := func(method, path string) bool {
 			return method == "GET" && path == "/healthz"
 		}
@@ -134,7 +134,7 @@ func TestLoggingMiddleware(t *testing.T) {
 	})
 
 	t.Run("logs when skip function returns false", func(t *testing.T) {
-		logger := zap.NewNop()
+		logger := logx.NewNoopLogger()
 		skip := func(method, path string) bool {
 			return false
 		}
@@ -160,7 +160,7 @@ func TestLoggingMiddleware(t *testing.T) {
 func TestRecoveryUsesRequestID(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	logger := zap.NewNop()
+	logger := logx.NewNoopLogger()
 
 	engine := gin.New()
 	// Register RequestID before Recovery so the context/header is set

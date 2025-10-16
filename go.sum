@@ -50,8 +50,12 @@ github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/gostratum/core v0.1.3 h1:RECUYUXRXKz1Dd2t4VVxsi97rDN3ohIyKxdpQ0h2LnE=
-github.com/gostratum/core v0.1.3/go.mod h1:cCavtXiXPTTS7d3N6pu1usJjzKHIBb3tQyfCy0Tu2Fg=
+github.com/gostratum/core v0.1.4 h1:qJv0kewrfSHoTDmFr7q9wrAYcyVMGyESccZJJQKuc9Y=
+github.com/gostratum/core v0.1.4/go.mod h1:MFwIS101d8PIahT8JWtHZGkm/WoxgQehkBiLQ0b6WE8=
+github.com/gostratum/metricsx v0.1.1 h1:J/3cIGNzDkC8P75++GuCHk0ZqwJLO6/vhLr9rjOE5LM=
+github.com/gostratum/metricsx v0.1.1/go.mod h1:6azYj0YRIBa2C47a0tAoupW6xrYiH0kPOv3u1SRBupk=
+github.com/gostratum/tracingx v0.1.1 h1:8Okm8shPPtrGI6CHuDbtlmvpy4x0vnoGcI9v2bwam/E=
+github.com/gostratum/tracingx v0.1.1/go.mod h1:Jitmq2BpOJRXXtTAnaDbi39y30v1hyaTXugYS8rDJcY=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 h1:asbCHRVmodnJTuQ3qamDwqVOIjwqUPTYmYuemVOx+Ys=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0/go.mod h1:ggCgvZ2r7uOoQjOyu2Y1NhHmEPPzzuhWgcza5M1Ji1I=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=

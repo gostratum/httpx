@@ -7,18 +7,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gostratum/core"
+	"github.com/gostratum/core/logx"
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 )
 
 // NewEngine creates and configures a new Gin engine with middleware and routes
-func NewEngine(log *zap.Logger, v *viper.Viper, skip func(string, string) bool, opts ...Option) *gin.Engine {
+func NewEngine(log logx.Logger, v *viper.Viper, skip func(string, string) bool, opts ...Option) *gin.Engine {
 	return NewEngineWithObservability(log, v, skip, ObservabilityParams{}, opts...)
 }
 
 // NewEngineWithObservability creates a Gin engine with optional observability middleware
-func NewEngineWithObservability(log *zap.Logger, v *viper.Viper, skip func(string, string) bool, obs ObservabilityParams, opts ...Option) *gin.Engine {
+func NewEngineWithObservability(log logx.Logger, v *viper.Viper, skip func(string, string) bool, obs ObservabilityParams, opts ...Option) *gin.Engine {
 	// Apply configuration from options
 	var s settings
 	if basePath := v.GetString("http.base_path"); basePath != "" {
@@ -58,7 +58,7 @@ func NewEngineWithObservability(log *zap.Logger, v *viper.Viper, skip func(strin
 }
 
 // StartServer starts the HTTP server with lifecycle management and graceful shutdown
-func StartServer(lc fx.Lifecycle, v *viper.Viper, log *zap.Logger, reg core.Registry, e *gin.Engine, opts ...Option) {
+func StartServer(lc fx.Lifecycle, v *viper.Viper, log logx.Logger, reg core.Registry, e *gin.Engine, opts ...Option) {
 	// Get server address from config
 	addr := v.GetString("http.addr")
 	if addr == "" {
@@ -82,9 +82,9 @@ func StartServer(lc fx.Lifecycle, v *viper.Viper, log *zap.Logger, reg core.Regi
 
 			// Start server in a goroutine
 			go func() {
-				log.Info("http: starting server", zap.String("addr", addr))
+				log.Info("http: starting server", logx.String("addr", addr))
 				if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-					log.Error("http: server error", zap.Error(err))
+					log.Error("http: server error", logx.Err(err))
 				}
 			}()
 
