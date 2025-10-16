@@ -14,6 +14,11 @@ import (
 
 // NewEngine creates and configures a new Gin engine with middleware and routes
 func NewEngine(log *zap.Logger, v *viper.Viper, skip func(string, string) bool, opts ...Option) *gin.Engine {
+	return NewEngineWithObservability(log, v, skip, ObservabilityParams{}, opts...)
+}
+
+// NewEngineWithObservability creates a Gin engine with optional observability middleware
+func NewEngineWithObservability(log *zap.Logger, v *viper.Viper, skip func(string, string) bool, obs ObservabilityParams, opts ...Option) *gin.Engine {
 	// Apply configuration from options
 	var s settings
 	if basePath := v.GetString("http.base_path"); basePath != "" {
@@ -30,6 +35,17 @@ func NewEngine(log *zap.Logger, v *viper.Viper, skip func(string, string) bool, 
 	// RecoveryMiddleware because the recovery handler reads the X-Request-ID
 	// header to include the request id in panic logs.
 	e.Use(RequestIDMiddleware())
+
+	// Add observability middleware if available (after RequestID, before Recovery)
+	if obs.Tracer != nil {
+		log.Info("httpx: enabling distributed tracing middleware")
+		e.Use(TracingMiddleware(obs.Tracer))
+	}
+	if obs.Metrics != nil {
+		log.Info("httpx: enabling metrics middleware")
+		e.Use(MetricsMiddleware(obs.Metrics))
+	}
+
 	e.Use(RecoveryMiddleware(log))
 	e.Use(LoggingMiddleware(log, skip))
 
