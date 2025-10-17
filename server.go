@@ -71,8 +71,8 @@ func StartServer(lc fx.Lifecycle, v *viper.Viper, log logx.Logger, reg core.Regi
 		Handler: e,
 	}
 
-	// Register health routes for Kubernetes probes
-	RegisterHealthRoutes(e, reg, v, opts...)
+	// Register health routes for Kubernetes probes (internal function)
+	registerHealthRoutes(e, reg, v, opts...)
 
 	// Add lifecycle hooks for graceful startup and shutdown
 	lc.Append(fx.Hook{

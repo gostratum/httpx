@@ -11,9 +11,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-// RegisterHealthRoutes registers the actuator-style health endpoints
+// registerHealthRoutes registers the actuator-style health endpoints internally
 // These are essential for Kubernetes liveness and readiness probes
-func RegisterHealthRoutes(e *gin.Engine, reg core.Registry, v *viper.Viper, opts ...Option) {
+func registerHealthRoutes(e *gin.Engine, reg core.Registry, v *viper.Viper, opts ...Option) {
 	// Apply settings from options
 	var s settings
 	if basePath := v.GetString("http.base_path"); basePath != "" {

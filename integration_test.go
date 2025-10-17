@@ -80,7 +80,7 @@ func TestRegisterHealthRoutes(t *testing.T) {
 		v := viper.New()
 		reg := &MockRegistry{}
 
-		RegisterHealthRoutes(engine, reg, v)
+		registerHealthRoutes(engine, reg, v)
 
 		// Test /healthz
 		w := httptest.NewRecorder()
@@ -106,7 +106,7 @@ func TestRegisterHealthRoutes(t *testing.T) {
 			BuiltAt: "2025-10-07T10:00:00Z",
 		}
 
-		RegisterHealthRoutes(engine, reg, v, WithInfo(info))
+		registerHealthRoutes(engine, reg, v, WithInfo(info))
 
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/actuator/info", nil)
@@ -125,7 +125,7 @@ func TestRegisterHealthRoutes(t *testing.T) {
 		v.Set("http.base_path", "/api")
 		reg := &MockRegistry{}
 
-		RegisterHealthRoutes(engine, reg, v)
+		registerHealthRoutes(engine, reg, v)
 
 		// Test health endpoints with base path
 		w := httptest.NewRecorder()
