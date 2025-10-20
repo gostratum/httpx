@@ -83,7 +83,7 @@ func TracingMiddleware(tracer tracingx.Tracer) gin.HandlerFunc {
 		// Start a new span for this request
 		ctx, span := tracer.Start(ctx, c.FullPath(),
 			tracingx.WithSpanKind(tracingx.SpanKindServer),
-			tracingx.WithAttributes(map[string]interface{}{
+			tracingx.WithAttributes(map[string]any{
 				"http.method":      c.Request.Method,
 				"http.url":         c.Request.URL.String(),
 				"http.host":        c.Request.Host,

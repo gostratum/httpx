@@ -12,7 +12,7 @@ import (
 func TestNewSkipper(t *testing.T) {
 	tests := []struct {
 		name         string
-		config       map[string]interface{}
+		config       map[string]any
 		method       string
 		path         string
 		expectedSkip bool
@@ -20,39 +20,39 @@ func TestNewSkipper(t *testing.T) {
 	}{
 		{
 			name:         "skip default health endpoints",
-			config:       map[string]interface{}{},
+			config:       map[string]any{},
 			method:       "GET",
 			path:         "/healthz",
 			expectedSkip: true,
 		},
 		{
 			name:         "skip default liveness endpoints",
-			config:       map[string]interface{}{},
+			config:       map[string]any{},
 			method:       "GET",
 			path:         "/livez",
 			expectedSkip: true,
 		},
 		{
 			name:         "skip default actuator endpoints",
-			config:       map[string]interface{}{},
+			config:       map[string]any{},
 			method:       "GET",
 			path:         "/actuator/info",
 			expectedSkip: true,
 		},
 		{
 			name:         "don't skip regular endpoints",
-			config:       map[string]interface{}{},
+			config:       map[string]any{},
 			method:       "GET",
 			path:         "/api/users",
 			expectedSkip: false,
 		},
 		{
 			name: "skip custom configured endpoints",
-			config: map[string]interface{}{
-				"http": map[string]interface{}{
-					"request": map[string]interface{}{
-						"logging": map[string]interface{}{
-							"disabled_urls": []map[string]interface{}{
+			config: map[string]any{
+				"http": map[string]any{
+					"request": map[string]any{
+						"logging": map[string]any{
+							"disabled_urls": []map[string]any{
 								{
 									"method":     "GET",
 									"urlPattern": "^/metrics$",
@@ -68,11 +68,11 @@ func TestNewSkipper(t *testing.T) {
 		},
 		{
 			name: "invalid regex should return error",
-			config: map[string]interface{}{
-				"http": map[string]interface{}{
-					"request": map[string]interface{}{
-						"logging": map[string]interface{}{
-							"disabled_urls": []map[string]interface{}{
+			config: map[string]any{
+				"http": map[string]any{
+					"request": map[string]any{
+						"logging": map[string]any{
+							"disabled_urls": []map[string]any{
 								{
 									"method":     "GET",
 									"urlPattern": "[invalid regex",
@@ -86,7 +86,7 @@ func TestNewSkipper(t *testing.T) {
 		},
 		{
 			name:         "case insensitive method matching",
-			config:       map[string]interface{}{},
+			config:       map[string]any{},
 			method:       "get",
 			path:         "/healthz",
 			expectedSkip: true,

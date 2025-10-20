@@ -83,10 +83,10 @@ func NewMockTracer() *MockTracer {
 	}
 }
 
-func (t *MockTracer) Start(ctx interface{}, name string, opts ...interface{}) (interface{}, *MockSpan) {
+func (t *MockTracer) Start(ctx any, name string, opts ...any) (any, *MockSpan) {
 	span := &MockSpan{
 		name:       name,
-		attributes: make(map[string]interface{}),
+		attributes: make(map[string]any),
 	}
 	t.spans = append(t.spans, span)
 	return ctx, span
@@ -94,13 +94,13 @@ func (t *MockTracer) Start(ctx interface{}, name string, opts ...interface{}) (i
 
 type MockSpan struct {
 	name       string
-	attributes map[string]interface{}
+	attributes map[string]any
 	ended      bool
 	statusCode int
 	statusMsg  string
 }
 
-func (s *MockSpan) SetAttributes(attrs ...interface{}) {
+func (s *MockSpan) SetAttributes(attrs ...any) {
 	// Simple implementation - just track that attributes were set
 	for i := 0; i < len(attrs); i += 2 {
 		if i+1 < len(attrs) {

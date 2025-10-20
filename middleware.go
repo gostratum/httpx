@@ -60,7 +60,7 @@ func LoggingMiddleware(log logx.Logger, skip func(method, path string) bool) gin
 
 // RecoveryMiddleware handles panics and converts them to 500 errors
 func RecoveryMiddleware(log logx.Logger) gin.HandlerFunc {
-	return gin.CustomRecovery(func(c *gin.Context, err interface{}) {
+	return gin.CustomRecovery(func(c *gin.Context, err any) {
 		// Prefer request ID from request context (set by RequestIDMiddleware),
 		// fall back to the response header if not present.
 		var requestID string
