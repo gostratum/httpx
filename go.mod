@@ -6,8 +6,8 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/gostratum/core v0.1.7
-	github.com/gostratum/metricsx v0.1.2
-	github.com/gostratum/tracingx v0.1.2
+	github.com/gostratum/metricsx v0.1.3
+	github.com/gostratum/tracingx v0.1.3
 	github.com/spf13/viper v1.21.0
 	go.uber.org/fx v1.24.0
 )
