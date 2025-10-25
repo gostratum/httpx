@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gostratum/core"
+	"github.com/gostratum/core/configx"
 	"github.com/gostratum/core/logx"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/fx"
@@ -46,13 +46,12 @@ func TestModule(t *testing.T) {
 
 	t.Run("module provides expected dependencies", func(t *testing.T) {
 		logger := logx.NewNoopLogger()
-		v := viper.New()
-		v.Set("http.addr", ":0") // Use random port for testing
+		loader := configx.New()
 		reg := &MockRegistry{}
 
 		app := fx.New(
 			fx.Provide(func() logx.Logger { return logger }),
-			fx.Provide(func() *viper.Viper { return v }),
+			fx.Provide(func() configx.Loader { return loader }),
 			fx.Provide(func() core.Registry { return reg }), // Mock core.Registry
 			Module(),
 			fx.Invoke(func(e *gin.Engine) {
@@ -77,10 +76,17 @@ func TestRegisterHealthRoutes(t *testing.T) {
 
 	t.Run("registers health endpoints", func(t *testing.T) {
 		engine := gin.New()
-		v := viper.New()
+		cfg := Config{
+			Health: HealthConfig{
+				ReadinessPath: "/healthz",
+				LivenessPath:  "/livez",
+				InfoPath:      "/actuator/info",
+				Timeout:       300 * time.Millisecond,
+			},
+		}
 		reg := &MockRegistry{}
 
-		registerHealthRoutes(engine, reg, v)
+		registerHealthRoutes(engine, reg, cfg)
 
 		// Test /healthz
 		w := httptest.NewRecorder()
@@ -97,7 +103,14 @@ func TestRegisterHealthRoutes(t *testing.T) {
 
 	t.Run("registers info endpoint with build info", func(t *testing.T) {
 		engine := gin.New()
-		v := viper.New()
+		cfg := Config{
+			Health: HealthConfig{
+				ReadinessPath: "/healthz",
+				LivenessPath:  "/livez",
+				InfoPath:      "/actuator/info",
+				Timeout:       300 * time.Millisecond,
+			},
+		}
 		reg := &MockRegistry{}
 
 		info := BuildInfo{
@@ -106,7 +119,7 @@ func TestRegisterHealthRoutes(t *testing.T) {
 			BuiltAt: "2025-10-07T10:00:00Z",
 		}
 
-		registerHealthRoutes(engine, reg, v, WithInfo(info))
+		registerHealthRoutes(engine, reg, cfg, WithInfo(info))
 
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/actuator/info", nil)
@@ -121,11 +134,18 @@ func TestRegisterHealthRoutes(t *testing.T) {
 
 	t.Run("registers endpoints with custom base path", func(t *testing.T) {
 		engine := gin.New()
-		v := viper.New()
-		v.Set("http.base_path", "/api")
+		cfg := Config{
+			BasePath: "/api",
+			Health: HealthConfig{
+				ReadinessPath: "/healthz",
+				LivenessPath:  "/livez",
+				InfoPath:      "/actuator/info",
+				Timeout:       300 * time.Millisecond,
+			},
+		}
 		reg := &MockRegistry{}
 
-		registerHealthRoutes(engine, reg, v)
+		registerHealthRoutes(engine, reg, cfg)
 
 		// Test health endpoints with base path
 		w := httptest.NewRecorder()

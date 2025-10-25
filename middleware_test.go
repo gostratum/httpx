@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gostratum/core/logx"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,28 +16,49 @@ func TestNewEngine(t *testing.T) {
 
 	t.Run("creates engine with default settings", func(t *testing.T) {
 		logger := logx.NewNoopLogger()
-		v := viper.New()
+		cfg := Config{
+			Health: HealthConfig{
+				ReadinessPath: "/healthz",
+				LivenessPath:  "/livez",
+				InfoPath:      "/actuator/info",
+				Timeout:       300 * time.Millisecond,
+			},
+		}
 		skip := func(method, path string) bool { return false }
 
-		engine := NewEngine(logger, v, skip)
+		engine := NewEngine(logger, cfg, skip)
 
 		assert.NotNil(t, engine)
 	})
 
 	t.Run("applies base path from config", func(t *testing.T) {
 		logger := logx.NewNoopLogger()
-		v := viper.New()
-		v.Set("http.base_path", "/api")
+		cfg := Config{
+			BasePath: "/api",
+			Health: HealthConfig{
+				ReadinessPath: "/healthz",
+				LivenessPath:  "/livez",
+				InfoPath:      "/actuator/info",
+				Timeout:       300 * time.Millisecond,
+			},
+		}
 		skip := func(method, path string) bool { return false }
 
-		engine := NewEngine(logger, v, skip)
+		engine := NewEngine(logger, cfg, skip)
 
 		assert.NotNil(t, engine)
 	})
 
 	t.Run("applies options", func(t *testing.T) {
 		logger := logx.NewNoopLogger()
-		v := viper.New()
+		cfg := Config{
+			Health: HealthConfig{
+				ReadinessPath: "/healthz",
+				LivenessPath:  "/livez",
+				InfoPath:      "/actuator/info",
+				Timeout:       300 * time.Millisecond,
+			},
+		}
 		skip := func(method, path string) bool { return false }
 
 		testMiddleware := func(c *gin.Context) {
@@ -45,7 +66,7 @@ func TestNewEngine(t *testing.T) {
 			c.Next()
 		}
 
-		engine := NewEngine(logger, v, skip, WithMiddleware(testMiddleware))
+		engine := NewEngine(logger, cfg, skip, WithMiddleware(testMiddleware))
 
 		assert.NotNil(t, engine)
 

@@ -8,21 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gostratum/core"
 	"github.com/gostratum/core/logx"
-	"github.com/spf13/viper"
 	"go.uber.org/fx"
 )
 
 // NewEngine creates and configures a new Gin engine with middleware and routes
-func NewEngine(log logx.Logger, v *viper.Viper, skip func(string, string) bool, opts ...Option) *gin.Engine {
-	return NewEngineWithObservability(log, v, skip, ObservabilityParams{}, opts...)
+func NewEngine(log logx.Logger, cfg Config, skip func(string, string) bool, opts ...Option) *gin.Engine {
+	return NewEngineWithObservability(log, cfg, skip, ObservabilityParams{}, opts...)
 }
 
 // NewEngineWithObservability creates a Gin engine with optional observability middleware
-func NewEngineWithObservability(log logx.Logger, v *viper.Viper, skip func(string, string) bool, obs ObservabilityParams, opts ...Option) *gin.Engine {
+func NewEngineWithObservability(log logx.Logger, cfg Config, skip func(string, string) bool, obs ObservabilityParams, opts ...Option) *gin.Engine {
 	// Apply configuration from options
 	var s settings
-	if basePath := v.GetString("http.base_path"); basePath != "" {
-		s.basePath = basePath
+	if cfg.BasePath != "" {
+		s.basePath = cfg.BasePath
 	}
 	for _, o := range opts {
 		o(&s)
@@ -58,12 +57,9 @@ func NewEngineWithObservability(log logx.Logger, v *viper.Viper, skip func(strin
 }
 
 // StartServer starts the HTTP server with lifecycle management and graceful shutdown
-func StartServer(lc fx.Lifecycle, v *viper.Viper, log logx.Logger, reg core.Registry, e *gin.Engine, opts ...Option) {
+func StartServer(lc fx.Lifecycle, cfg Config, log logx.Logger, reg core.Registry, e *gin.Engine, opts ...Option) {
 	// Get server address from config
-	addr := v.GetString("http.addr")
-	if addr == "" {
-		addr = ":8080"
-	}
+	addr := cfg.Addr
 
 	// Create HTTP server
 	srv := &http.Server{
@@ -72,7 +68,7 @@ func StartServer(lc fx.Lifecycle, v *viper.Viper, log logx.Logger, reg core.Regi
 	}
 
 	// Register health routes for Kubernetes probes (internal function)
-	registerHealthRoutes(e, reg, v, opts...)
+	registerHealthRoutes(e, reg, cfg, opts...)
 
 	// Add lifecycle hooks for graceful startup and shutdown
 	lc.Append(fx.Hook{

@@ -3,8 +3,6 @@ package httpx
 import (
 	"regexp"
 	"strings"
-
-	"github.com/spf13/viper"
 )
 
 // DisabledURL represents a URL pattern to skip in request logging
@@ -21,29 +19,14 @@ type compiledRule struct {
 
 // NewSkipper creates a function that determines whether to skip logging for a given request
 // It loads patterns from config and ensures actuator/health endpoints are skipped by default
-func NewSkipper(v *viper.Viper) (func(method, path string) bool, error) {
-	// Load user-defined rules from config
-	var userRules []DisabledURL
-	if err := v.UnmarshalKey("http.request.logging.disabled_urls", &userRules); err != nil {
-		// Ignore unmarshal errors for missing/empty config
-		userRules = nil
-	}
+func NewSkipper(cfg Config) (func(method, path string) bool, error) {
+	// Get user-defined rules from config
+	userRules := cfg.Request.Logging.DisabledURLs
 
 	// Get configurable health endpoint paths
-	healthzPath := v.GetString("http.health.readiness_path")
-	if healthzPath == "" {
-		healthzPath = "/healthz"
-	}
-
-	livezPath := v.GetString("http.health.liveness_path")
-	if livezPath == "" {
-		livezPath = "/livez"
-	}
-
-	infoPath := v.GetString("http.health.info_path")
-	if infoPath == "" {
-		infoPath = "/actuator/info"
-	}
+	healthzPath := cfg.Health.ReadinessPath
+	livezPath := cfg.Health.LivenessPath
+	infoPath := cfg.Health.InfoPath
 
 	// Always ensure health endpoints are skipped by default (using configured paths)
 	defaultRules := []DisabledURL{

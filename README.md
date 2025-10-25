@@ -5,9 +5,10 @@ A thin, reusable HTTP layer for Go applications built on top of `github.com/gost
 ## Features
 
 - **Fx-first composition**: No globals, clean dependency injection with `go.uber.org/fx`
+- **Typed configuration**: Uses `core/configx` with structured config following framework conventions
 - **Universal health endpoints**: Built-in `/healthz` (readiness) and `/livez` (liveness) for all app types
 - **Optional info endpoint**: `/actuator/info` with build metadata when enabled
-- **Config-driven defaults**: HTTP configuration via Viper with sensible defaults
+- **Config-driven defaults**: HTTP configuration with sensible defaults
 - **Request logging controls**: Pattern-based log skipping with regex support
 - **Lifecycle management**: Graceful startup and shutdown via fx.Lifecycle
 - **Built-in middleware**: Request ID, Zap logging, and recovery middleware
@@ -55,7 +56,15 @@ func main() {
 
 ## Configuration
 
-The module reads configuration from Viper under the `http` key:
+The module uses typed configuration following the GoStratum framework pattern. Configuration is loaded via `core/configx` under the `http` prefix.
+
+**Configuration Precedence (highest to lowest):**
+1. Environment variables: `STRATUM_HTTP_*`
+2. Environment-specific config file: `{APP_ENV}.yaml`
+3. Base config file: `base.yaml`
+4. Struct tag defaults
+
+### YAML Configuration
 
 ```yaml
 http:
@@ -75,6 +84,18 @@ http:
           urlPattern: "^/metrics$"
         - method: "POST"
           urlPattern: "^/webhook/.*"
+```
+
+### Environment Variables
+
+All configuration can be overridden with environment variables using the `STRATUM_HTTP_` prefix:
+
+```bash
+export STRATUM_HTTP_ADDR=":9090"
+export STRATUM_HTTP_BASE_PATH="/api"
+export STRATUM_HTTP_HEALTH_READINESS_PATH="/ready"
+export STRATUM_HTTP_HEALTH_LIVENESS_PATH="/alive"
+export STRATUM_HTTP_HEALTH_TIMEOUT="500ms"
 ```
 
 ### Default Configuration
@@ -240,11 +261,12 @@ http:
 
 The httpx module is designed to work seamlessly with `github.com/gostratum/core`:
 
-- Uses core's Viper instance for configuration
+- Uses core's `configx.Loader` for typed configuration (following framework pattern)
 - Exposes core's Registry health checks via HTTP endpoints
 - Sets liveness status when HTTP server starts: `reg.Set(core.Liveness, "http.server", nil)`
 - Follows core's fx-first architecture patterns
 - Respects health endpoint log skipping by default
+- **No direct viper access**: Uses typed Config struct with validation
 
 ## Examples
 
@@ -310,15 +332,24 @@ app := core.New(
 ### Custom Health Endpoints
 
 ```go
-// Configure custom health endpoint paths
+// Configure custom health endpoint paths via environment or config files
+// Environment variables:
+// export STRATUM_HTTP_HEALTH_READINESS_PATH="/health/ready"
+// export STRATUM_HTTP_HEALTH_LIVENESS_PATH="/health/alive"
+// export STRATUM_HTTP_HEALTH_INFO_PATH="/info"
+// export STRATUM_HTTP_HEALTH_TIMEOUT="500ms"
+
+// Or via YAML config file (base.yaml or dev.yaml/prod.yaml)
+// http:
+//   health:
+//     readiness_path: "/health/ready"
+//     liveness_path: "/health/alive"
+//     info_path: "/info"
+//     timeout: "500ms"
+
 app := core.New(
     httpx.Module(),
-    fx.Invoke(func(v *viper.Viper) {
-        v.Set("http.health.readiness_path", "/health/ready")
-        v.Set("http.health.liveness_path", "/health/alive") 
-        v.Set("http.health.info_path", "/info")
-        v.Set("http.health.timeout", "500ms")
-    }),
+    // Configuration is automatically loaded from configx
 )
 ```
 
