@@ -459,6 +459,10 @@ spec:
 - `github.com/gin-gonic/gin` - HTTP web framework
 - `github.com/google/uuid` - UUID generation for request IDs
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a complete list of changes.
+
 ## License
 
 This project follows the same license as the gostratum organization.
