@@ -12,17 +12,14 @@ import (
 // registerHealthRoutes registers the actuator-style health endpoints internally
 // These are essential for Kubernetes liveness and readiness probes
 func registerHealthRoutes(e *gin.Engine, reg core.Registry, cfg Config, opts ...Option) {
-	// Apply settings from options
-	var s settings
-	if cfg.BasePath != "" {
-		s.basePath = cfg.BasePath
-	}
+	// Apply programmatic settings from options
+	var modCfg moduleConfig
 	for _, o := range opts {
-		o(&s)
+		o(&modCfg)
 	}
 
-	// Determine base path
-	base := s.basePath
+	// Determine base path from config
+	base := cfg.BasePath
 	if base == "" {
 		base = "/"
 	}
@@ -71,12 +68,12 @@ func registerHealthRoutes(e *gin.Engine, reg core.Registry, cfg Config, opts ...
 	})
 
 	// Optional info endpoint if WithInfo was provided
-	if s.info != nil {
+	if modCfg.info != nil {
 		g.GET(infoPath, func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"version": s.info.Version,
-				"commit":  s.info.Commit,
-				"builtAt": s.info.BuiltAt,
+				"version": modCfg.info.Version,
+				"commit":  modCfg.info.Commit,
+				"builtAt": modCfg.info.BuiltAt,
 			})
 		})
 	}

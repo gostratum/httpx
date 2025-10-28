@@ -18,13 +18,10 @@ func NewEngine(log logx.Logger, cfg Config, skip func(string, string) bool, opts
 
 // NewEngineWithObservability creates a Gin engine with optional observability middleware
 func NewEngineWithObservability(log logx.Logger, cfg Config, skip func(string, string) bool, obs ObservabilityParams, opts ...Option) *gin.Engine {
-	// Apply configuration from options
-	var s settings
-	if cfg.BasePath != "" {
-		s.basePath = cfg.BasePath
-	}
+	// Apply programmatic configuration from options
+	var modCfg moduleConfig
 	for _, o := range opts {
-		o(&s)
+		o(&modCfg)
 	}
 
 	// Create new Gin engine
@@ -49,7 +46,7 @@ func NewEngineWithObservability(log logx.Logger, cfg Config, skip func(string, s
 	e.Use(LoggingMiddleware(log, skip))
 
 	// Add any extra middleware provided via options
-	for _, mw := range s.extraMW {
+	for _, mw := range modCfg.extraMW {
 		e.Use(mw)
 	}
 

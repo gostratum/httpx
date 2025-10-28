@@ -36,7 +36,6 @@ import (
 func main() {
     app := core.New(
         httpx.Module(
-            httpx.WithBasePath("/api"),
             httpx.WithInfo(httpx.BuildInfo{
                 Version: "v1.0.0",
                 Commit:  "abcd123",
@@ -52,6 +51,19 @@ func main() {
     
     app.Run()
 }
+```
+
+**Configuration (base.yaml):**
+```yaml
+http:
+  addr: ":8080"
+  base_path: "/"              # Base path for all routes
+  
+  health:
+    readiness_path: "/healthz"
+    liveness_path: "/livez"
+    info_path: "/actuator/info"
+    timeout: "300ms"
 ```
 
 ## Configuration
@@ -123,19 +135,9 @@ Returns an fx.Option that can be included in your fx application. The module pro
 - Built-in health endpoints (`/healthz`, `/livez`) for Kubernetes probes
 - Optional info endpoint (`/actuator/info`) when build metadata is provided
 
-### Options
+### Module Options
 
-#### WithBasePath
-
-```go
-func WithBasePath(path string) Option
-```
-
-Overrides the base path for all routes. This takes precedence over the `http.base_path` configuration.
-
-```go
-httpx.Module(httpx.WithBasePath("/api/v1"))
-```
+The HTTPX module uses a "Configuration for values, Options for code" pattern. Simple configuration values are managed via YAML config, while programmatic options handle Go functions and complex objects.
 
 #### WithMiddleware
 
@@ -152,6 +154,8 @@ httpx.Module(httpx.WithMiddleware(
 ))
 ```
 
+**Use case:** Custom middleware that requires Go functions (cannot be in YAML)
+
 #### WithInfo
 
 ```go
@@ -167,6 +171,42 @@ httpx.Module(httpx.WithInfo(httpx.BuildInfo{
     BuiltAt: "2025-10-07T10:00:00Z",
 }))
 ```
+
+**Use case:** Build metadata that can be programmatically generated
+
+### Configuration Options (YAML)
+
+Simple configuration values are managed via YAML config instead of module options:
+
+```yaml
+http:
+  addr: ":8080"                    # Server listen address
+  base_path: "/"                   # Base path for all routes
+  
+  health:
+    readiness_path: "/healthz"     # Readiness endpoint path
+    liveness_path: "/livez"        # Liveness endpoint path
+    info_path: "/actuator/info"    # Info endpoint path
+    timeout: "300ms"               # Health check timeout
+    
+  request:
+    logging:
+      disabled_urls:               # URLs to skip in request logging
+        - method: "GET"
+          urlPattern: "^/metrics$"
+        - method: "POST"
+          urlPattern: "^/webhook/.*"
+```
+
+### Configuration vs Options Summary
+
+| Configuration | How to Set | Example |
+|---------------|-----------|---------|
+| **Server address** | YAML: `http.addr` | `http.addr: ":9090"` |
+| **Base path** | YAML: `http.base_path` | `http.base_path: "/api/v1"` |
+| **Health paths** | YAML: `http.health.*_path` | `http.health.readiness_path: "/health/ready"` |
+| **Custom middleware** | Option: `WithMiddleware()` | `httpx.WithMiddleware(authMW)` |
+| **Build info** | Option: `WithInfo()` | `httpx.WithInfo(buildInfo)` |
 
 ### BuildInfo
 
@@ -276,7 +316,6 @@ The httpx module is designed to work seamlessly with `github.com/gostratum/core`
 // Full HTTP server with business endpoints + health endpoints
 app := core.New(
     httpx.Module(
-        httpx.WithBasePath("/api"),
         httpx.WithInfo(httpx.BuildInfo{
             Version: "v1.0.0",
             Commit:  "abc123", 
@@ -358,7 +397,6 @@ app := core.New(
 ```go
 app := core.New(
     httpx.Module(
-        httpx.WithBasePath("/api"),
         httpx.WithMiddleware(customAuthMiddleware),
         httpx.WithInfo(buildInfo),
     ),

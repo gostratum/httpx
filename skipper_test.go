@@ -155,36 +155,29 @@ func TestNewSkipper(t *testing.T) {
 }
 
 func TestOptions(t *testing.T) {
-	t.Run("WithBasePath", func(t *testing.T) {
-		var s settings
-		opt := WithBasePath("/api/v1")
-		opt(&s)
-		assert.Equal(t, "/api/v1", s.basePath)
-	})
-
 	t.Run("WithInfo", func(t *testing.T) {
-		var s settings
+		var modCfg moduleConfig
 		info := BuildInfo{
 			Version: "v1.0.0",
 			Commit:  "abc123",
 			BuiltAt: "2025-10-07",
 		}
 		opt := WithInfo(info)
-		opt(&s)
-		require.NotNil(t, s.info)
-		assert.Equal(t, "v1.0.0", s.info.Version)
-		assert.Equal(t, "abc123", s.info.Commit)
-		assert.Equal(t, "2025-10-07", s.info.BuiltAt)
+		opt(&modCfg)
+		require.NotNil(t, modCfg.info)
+		assert.Equal(t, "v1.0.0", modCfg.info.Version)
+		assert.Equal(t, "abc123", modCfg.info.Commit)
+		assert.Equal(t, "2025-10-07", modCfg.info.BuiltAt)
 	})
 
 	t.Run("WithMiddleware", func(t *testing.T) {
-		var s settings
+		var modCfg moduleConfig
 		middleware1 := func(c *gin.Context) {}
 		middleware2 := func(c *gin.Context) {}
 
 		opt := WithMiddleware(middleware1, middleware2)
-		opt(&s)
+		opt(&modCfg)
 
-		assert.Len(t, s.extraMW, 2)
+		assert.Len(t, modCfg.extraMW, 2)
 	})
 }
