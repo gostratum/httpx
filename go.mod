@@ -5,9 +5,9 @@ go 1.25.1
 require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/google/uuid v1.6.0
-	github.com/gostratum/core v0.2.0
-	github.com/gostratum/metricsx v0.2.0
-	github.com/gostratum/tracingx v0.2.0
+	github.com/gostratum/core v0.2.2
+	github.com/gostratum/metricsx v0.2.1
+	github.com/gostratum/tracingx v0.2.1
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/fx v1.24.0
 )
