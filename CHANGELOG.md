@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.2.1] - 2025-10-31
+
+### Added
+- Release version 0.2.1
+
+### Changed
+- Updated gostratum dependencies to latest versions
+
+
 ### Removed
 - **BREAKING:** Removed `SanitizeViper()` function - was added in v0.1.4 but never used externally
   - Modern replacement: Use `Config.Sanitize()` method instead
