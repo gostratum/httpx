@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **BREAKING:** Removed `SanitizeViper()` function - was added in v0.1.4 but never used externally
+  - Modern replacement: Use `Config.Sanitize()` method instead
+  - Eliminates last viper dependency from httpx module
+  - Part of framework-wide viper elimination effort
 
 ## [0.2.0] - 2025-10-29
 
